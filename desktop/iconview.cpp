@@ -51,7 +51,7 @@ IconView::IconView( QWidget* parent ) : QListView(parent),m_actionCollection(thi
     setWrapping(true);
     setResizeMode(QListView::Adjust);
     setSelectionRectVisible(true);
-    setGridSize( QSize( 64, 64 ) );
+//     setGridSize( QSize( 100, 100 ) );
     setSpacing( 2 );
     setUniformItemSizes(true);
     setEditTriggers(QAbstractItemView::EditKeyPressed);
@@ -59,6 +59,8 @@ IconView::IconView( QWidget* parent ) : QListView(parent),m_actionCollection(thi
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setFrameShape(QFrame::NoFrame);
+//     setFocusPolicy(Qt::ClickFocus);
+    setMouseTracking(true);
 
     /// lazy initialization
     QTimer::singleShot(0, this, SLOT(init()));
