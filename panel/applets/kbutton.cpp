@@ -31,7 +31,7 @@ void KButton::init()
 
     m_button = new QToolButton;
     m_button->setIcon(KIcon("start-here-kde"));
-    m_button->setIconSize(QSize(32, 32));
+    m_button->setIconSize(QSize(24, 24));
     m_button->setAutoRaise(true);
     layout->addWidget(m_button);
 

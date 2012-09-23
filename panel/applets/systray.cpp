@@ -93,7 +93,7 @@ bool SysTray::x11Event( XEvent* event )
                     SysTrayWidget* container = new SysTrayWidget( this );
                     bool ret = container->embedSystemTrayClient( systemTrayClientId );
                     if (ret) {
-                        connect( container, SIGNAL(clientClosed()), this, SIGNAL(sizeChanged()) );
+                        connect( container, SIGNAL(clientClosed()), this, SLOT(updateSysTray()) );
                         SysTrayWidgetList << container;
                         qWarning() << "dock." << systemTrayClientId << "@" << container;
                         updateLayout();

@@ -20,7 +20,7 @@ Container::Container(QWidget* parent) : QWidget(parent)
     KWindowSystem::setOnAllDesktops(winId(), true);
 
     m_side = Bottom;
-    m_occ = 32;
+    m_occ = 28;
 
     declareArea();
 
