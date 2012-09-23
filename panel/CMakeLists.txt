@@ -28,4 +28,3 @@ target_link_libraries(kuaipanel
 
 install(TARGETS kuaipanel ${INSTALL_TARGETS_DEFAULT_ARGS})
 # install(FILES kuaipanel.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-install(FILES kuaipanelapplet.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR})

@@ -32,7 +32,7 @@
 #include "icondelegate.h"
 
 /// NOTE change wallpaper here
-#define DEFAULT_WALLPAPER "/home/nihui/aurora.png"
+#define DEFAULT_WALLPAPER "/home/nihui/wallpaper.png"
 
 IconView::IconView( QWidget* parent ) : QListView(parent),m_actionCollection(this)
 {

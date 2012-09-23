@@ -79,7 +79,6 @@ bool SysTray::x11Event( XEvent* event )
         if ( event->xclient.message_type == m_opcodeAtom ) {
             switch ( event->xclient.data.l[1] ) {
                 case SYSTEM_TRAY_REQUEST_DOCK: {
-                    qWarning() << "dock.";
                     const WId systemTrayClientId = (WId)event->xclient.data.l[2];
                     if ( systemTrayClientId == 0 ) {
                         return true;
@@ -92,12 +91,13 @@ bool SysTray::x11Event( XEvent* event )
 
                     // Set up a SystemTrayContainer for the client
                     SysTrayWidget* container = new SysTrayWidget( this );
-                    container->embedSystemTrayClient( systemTrayClientId );
-                    SysTrayWidgetList << container;
-                    connect( container, SIGNAL(clientClosed()), this, SLOT(updateSysTray()) );
-                    connect( container, SIGNAL(clientClosed()), this, SIGNAL(sizeChanged()) );
-                    emit sizeChanged();
-                    updateLayout();
+                    bool ret = container->embedSystemTrayClient( systemTrayClientId );
+                    if (ret) {
+                        connect( container, SIGNAL(clientClosed()), this, SIGNAL(sizeChanged()) );
+                        SysTrayWidgetList << container;
+                        qWarning() << "dock." << systemTrayClientId << "@" << container;
+                        updateLayout();
+                    }
                     return true;
                 }
                 case SYSTEM_TRAY_BEGIN_MESSAGE:
@@ -127,11 +127,8 @@ void SysTray::updateLayout()
 //     qWarning() << trayCount << rows << cols;
     int r = 0;
     int c = 0;
-    QList<SysTrayWidget*>::Iterator it = SysTrayWidgetList.begin();
-    QList<SysTrayWidget*>::Iterator end = SysTrayWidgetList.end();
-    while ( it != end ) {
-        trayLayout->addWidget( *it, r, c );
-        ++it;
+    foreach (SysTrayWidget* w, SysTrayWidgetList) {
+        trayLayout->addWidget( w, r, c );
         if ( ++c == cols ) {
             c = 0;
             ++r;
@@ -139,21 +136,16 @@ void SysTray::updateLayout()
     }
 
     updateGeometry();
+
+    emit sizeChanged();
 }
 
 void SysTray::updateSysTray()
 {
-    QList<SysTrayWidget*>::Iterator it = SysTrayWidgetList.begin();
-    while ( it != SysTrayWidgetList.end() ) {
-        if ( (*it)->clientWinId() == 0 ) {
-            SysTrayWidget* w = *it;
-            it = SysTrayWidgetList.erase( it );
-            delete w;
-        }
-        else {
-            ++it;
-        }
-    }
+    SysTrayWidget* w = static_cast<SysTrayWidget*>(sender());
+    qWarning() << "undock." << "@" << w;
+    SysTrayWidgetList.removeOne(w);
+    delete w;
     updateLayout();
 }
 
@@ -165,11 +157,11 @@ SysTrayWidget::~SysTrayWidget()
 {
 }
 
-void SysTrayWidget::embedSystemTrayClient( WId clientId )
+bool SysTrayWidget::embedSystemTrayClient( WId clientId )
 {
     if( !prepareFor( clientId ) ) { // temporary hack, until QX11EmbedContainer gets fixed
          deleteLater();
-         return;
+         return false;
     }
 
     embedClient( clientId );
@@ -183,7 +175,10 @@ void SysTrayWidget::embedSystemTrayClient( WId clientId )
     XWindowAttributes attr;
     if( !XGetWindowAttributes( QX11Info::display(), clientId, &attr ) ) {
         deleteLater();
+        return false;
     }
+
+    return true;
 }
 
 // Temporary hack to change X window used by QX11EmbedContainer so that it matches
@@ -205,6 +200,10 @@ bool SysTrayWidget::prepareFor( WId w )
     Window winId = XCreateWindow(display, parentID,
                                  0, 0, attr.width, attr.height, 0, attr.depth, InputOutput, attr.visual,
                               CWBackPixel | CWBorderPixel | CWColormap, &sa);
+
+    if( !XGetWindowAttributes(display, w, &attr))
+        return false;
+
     create(winId);
 
     // repeat everything from QX11EmbedContainer's ctor that might be relevant

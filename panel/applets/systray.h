@@ -37,7 +37,7 @@ Q_OBJECT
 public:
     explicit SysTrayWidget( QWidget* parent = 0 );
     virtual ~SysTrayWidget();
-    void embedSystemTrayClient( WId clientId );
+    bool embedSystemTrayClient( WId clientId );
 protected:
 //         virtual bool x11Event( XEvent* event );
 private:
